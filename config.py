@@ -1,15 +1,14 @@
-# 项目的配置文档
-import os
+# coding=utf-8
+import os,base64
 import redis
 class Config(object):
     SQLALCHEMY_DATABASE_URI = 'mysql://root:mysql@127.0.0.1/flask_01'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SECRET_KEY = '/oxz/7k162x6X5bHoGIaguhFJG3zvDkg'
 
-#项目的调试模式
 class ProductionConfig(Config):
     pass
-# 项目的发布模式
+
 class DevelopmentConfig(Config):
     DEBUG = True
-    # 创建会话密钥
-    SECRET_KEY = 'os.urandom(24)'
+

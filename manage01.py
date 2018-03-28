@@ -6,44 +6,35 @@ from flask_script import Manager  # 启动扩展包
 from flask_migrate import Migrate, MigrateCommand  # 迁移命令扩展包
 import os
 import redis
-
-class Config(object):
-    '''项目的配置'''
-    SQLALCHEMY_DATABASE_URI = 'mysql://root:mysql@127.0.0.1/flask_01'
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-    # 创建会话密钥
-    SECRET_KEY = 'os.urandom(24)'
-#项目的调试模式
-class ProductionConfig(Config):
-    pass
-# 项目的发布模式
-class DevelopmentConfig(Config):
-    DEBUG = True
-
-
-#  app db 的生成函数
-def create_appdb(config_class):
-    # 创建应用
-    # 创建Flask类的实例， 即WIGS应用程序
-    app = Flask(__name__)
-    # 创建数据库
-    db = SQLAlchemy(app)
-    #调用数据库的配置
-    app.config.from_object(config_class)
-    return app,db
-
-# 函数create_appdb的参数 可以控制项目是调试模式 还是发布模式
-app,db = create_appdb(DevelopmentConfig) # 发布模式
+from flask import blueprints
+# 创建Flask类的实例， 即WIGS应用程序
+app = Flask(__name__)
+# 创建数据库
+db = SQLAlchemy(app)
 
 manager = Manager(app)
 # 迁移操作 第一个参数是flask实例 第二个参数是SQLALchemy实例
 migrate = Migrate(app, db)
 # 对数据库增加可迁移操作命令
 manager.add_command('db', MigrateCommand)
-# 使用 route() 装饰器告诉 Flask 什么样的URL 能触发我们的函数
+#调用数据库的配置
+# 注册蓝图
+
+'''项目的配置'''
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:mysql@127.0.0.1/flask_01'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# 创建会话密钥
+SECRET_KEY = 'os.urandom(24)'
 
 
-@app.route('/')
+# 函数create_appdb的参数 可以控制项目是调试模式 还是发布模式
+
+
+#创建蓝图
+api = blueprints('api',__name__)
+app.register_blueprint(api)
+
+@api.route('/')
 def index():
     return 'Hello World'
 
