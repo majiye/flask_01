@@ -9,6 +9,9 @@ class Config(object):
     # SECRET_KEY = '/oxz/7k162x6X5bHoGIaguhFJG3zvDkg'
     SECRET_KEY = 'base64.b64encode(os.urandom(24))'
 
+    #redis实例用到的参数
+    REDIS_PORT = '6379'
+    REDIS_HOST = '127.0.0.1'
 
 class ProductionConfig(Config):
     pass

@@ -4,9 +4,13 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 # from ihome.api_1_0 import api  # 注册蓝图用
 from flask_wtf import CSRFProtect
+import redis
+from config import Config
 
 db = SQLAlchemy()
 
+# 其他模块使用redis_store操作redis
+redis_store = None
 
 # 参数config_class接收配置文件的开发模式类 Developmentconfig Productionconfig
 def create_appdb(config_class):
@@ -24,6 +28,9 @@ def create_appdb(config_class):
     # CSRF保护 针对post/put/delete等会修改数据的请求，需要开启保护
     CSRFProtect(app)
 
+    # 创建redis
+    global redis_store
+    redis_store = redis.StrictRedis(host=Config.REDIS_HOST,port=Config.REDIS_PORT)
     # 蓝图的导入, 可以用到时在加载, 以避免循环导入的问题
     # 注册蓝图
     from ihome.api_1_0 import api  # 注册蓝图用
