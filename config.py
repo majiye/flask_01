@@ -13,6 +13,14 @@ class Config(object):
     REDIS_PORT = '6379'
     REDIS_HOST = '127.0.0.1'
 
+    # session配置
+    SESSION_TYPE = 'redis'
+    SESSION_USE_SIGNER = True # 设置签名加密
+
+    # 扩展默认会有redis的地址信息
+    SESSION_REDIS = redis.StrictRedis(host=REDIS_HOST,port=REDIS_PORT)
+    PERMANENT_SESSION_LIFETIME = 86400 * 2
+
 class ProductionConfig(Config):
     pass
 
