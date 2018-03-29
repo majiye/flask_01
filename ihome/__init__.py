@@ -52,7 +52,7 @@ def create_appdb(config_class):
     # 利用扩展flask_session 创建session  保存浏览器的cookie session
     Session(app)
 
-
+#hh
     # 蓝图的导入, 可以用到时在加载, 以避免循环导入的问题
     # 注册蓝图
     from ihome.api_1_0 import api  # 注册蓝图用
