@@ -11,7 +11,7 @@ class Config(object):
 
     #redis实例用到的参数
     REDIS_PORT = '6379'
-    REDIS_HOST = '127.0.0.1'
+    REDIS_HOST = '192.168.189.139'
 
     # session配置
     SESSION_TYPE = 'redis'
