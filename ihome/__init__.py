@@ -10,7 +10,7 @@ from flask_wtf import CSRFProtect
 import redis
 from config import Config
 from flask_session import Session
-
+from utils.commons import RegexConverter
 db = SQLAlchemy()
 
 # 其他模块使用redis_store操作redis
@@ -35,7 +35,8 @@ def create_appdb(config_class):
     # 创建应用
     # 创建Flask类的实例， 即WIGS应用程序
     app = Flask(__name__)
-    # 创建数据库
+    # 将自定义转换器添加到转换器字典中 必须放到路由前面
+    app.url_map.converters['re'] = RegexConverter
 
     # db = SQLAlchemy(app)
     #调用数据库的配置
@@ -54,7 +55,11 @@ def create_appdb(config_class):
 
 #hh
     # 蓝图的导入, 可以用到时在加载, 以避免循环导入的问题
-    # 注册蓝图
+    # 注册路由蓝图
     from ihome.api_1_0 import api  # 注册蓝图用
     app.register_blueprint(api)
+    # 注册静态文件的蓝图
+    import web_html
+    app.register_blueprint(web_html.html)
+
     return app,db

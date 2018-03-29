@@ -1,45 +1,67 @@
 # -*- coding:utf-8 -*-
-'''主要负责程序的启动 以及 数据库的操作'''
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_script import Manager  # 启动扩展包
-from flask_migrate import Migrate, MigrateCommand  # 迁移命令扩展包
-import os
-import redis
-from flask import blueprints
-# 创建Flask类的实例， 即WIGS应用程序
-app = Flask(__name__)
-# 创建数据库
-db = SQLAlchemy(app)
 
-manager = Manager(app)
-# 迁移操作 第一个参数是flask实例 第二个参数是SQLALchemy实例
-migrate = Migrate(app, db)
-# 对数据库增加可迁移操作命令
-manager.add_command('db', MigrateCommand)
-#调用数据库的配置
-# 注册蓝图
+# 此文件,专门处理静态文件的访问. 不做模板的渲染, 只是转发文件路径
 
-'''项目的配置'''
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:mysql@127.0.0.1/flask_01'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-# 创建会话密钥
-SECRET_KEY = 'os.urandom(24)'
+from flask import Blueprint, current_app, make_response
+from flask_wtf.csrf import generate_csrf
 
 
-# 函数create_appdb的参数 可以控制项目是调试模式 还是发布模式
+html = Blueprint('html', __name__)
+
+# (.*)
+# 我们只需要1个路由来搞定静态文件的访问
 
 
-#创建蓝图
-api = blueprints('api',__name__)
-app.register_blueprint(api)
+@html.route('/<re(r".*"):file_name>')
+def web_html(file_name):
+    '''
+    127.0.0.1:5000/     index.html
+    127.0.0.1:5000/login.html     login.html
+    /favicon.ico    固定访问的名字, 我们还需要处理浏览器发出的访问网站小图标的请求
+    '''
 
-@api.route('/')
-def index():
-    return 'Hello World'
+    # 1. 处理没有文件名, 自行拼接首页
+    if not file_name:
+        file_name = 'index.html'
+
+    # 2. 如果发现文件名不叫"favicon.ico", 再拼接html/路径
+    # favicon.ico: 浏览器为了显示图标, 会自动向地址发出一个请求
+    # favicon.ico: 会有缓存,打开浏览器第一次访问该网址时会发出请求.然后缓存起来
+    if file_name != 'favicon.ico':
+        file_name = 'html/' + file_name
+
+    # 将html当做静态文件返回
+    # 3. 如果文件名是'favicon.ico', 就直接返回
+    print file_name
+
+    # 创建response
+    response = make_response(current_app.send_static_file(file_name))
+
+    # 这里还需要设置csrf_token
+    csrf_token = generate_csrf()
+
+    # 设置cookie
+    response.set_cookie('csrf_token', csrf_token)
+    # Flask-WTF的generate_csrf, 会将cookie中的csrf_token信息, 会同步到session中
+    # Flask-Session又会讲session中的csrf_token, 同步到redis中
+    # generate_csrf不会每次调用都生成. 会先判断浏览器的cookie中的session里是否有csrf_token信息.没有才重新生成
+    # 常规的CSRF保护机制, 是从浏览器的cookie中获取. 而Flask-WTF的扩展机制不一样, 是从session信息中获取csrf_token保护机制
+
+    return response
 
 
-# lask应用程序实例的run方法启动WEB服务器
-if __name__ == '__main__':
-    # app.debug = True
-    manager.run()
+
+# @html.route('/')
+# def web_html():
+#     # 发送静态资源, 而不是渲染模板
+#
+#     # send_static_file: 会自动指向static文件
+#     return current_app.send_static_file('html/index.html')
+#
+#
+# @html.route('/<file_name>')
+# def web_html_demo(file_name):
+#     # 发送静态资源, 而不是渲染模板
+#
+#     # send_static_file: 会自动指向static文件
+#     return current_app.send_static_file('html/' + file_name)
