@@ -20,4 +20,4 @@ def index():
 
 @api.route('/demo',methods=['GET','POST'])
 def demo():
-    return 'demooo'
+    return
