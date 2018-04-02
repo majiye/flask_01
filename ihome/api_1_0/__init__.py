@@ -5,5 +5,5 @@ from flask import Blueprint
 api = Blueprint('api',__name__,url_prefix='/api/v1_0')
 
 import index
-import verify_code
+import verify_code, passport
 # url_prefix='/api/v1_0'

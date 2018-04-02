@@ -22,4 +22,5 @@ manager.add_command('db', MigrateCommand)
 # lask应用程序实例的run方法启动WEB服务器
 if __name__ == '__main__':
     # app.debug = True
+    print(app.url_map)
     manager.run()

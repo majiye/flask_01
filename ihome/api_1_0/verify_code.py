@@ -43,112 +43,114 @@ def get_image_code(image_code_id):
     # 请求方法get
     # 路由：sms_codes
     # 参数：手机号 / 图像验证码 / 编号
-    @api.route('/sms_codes/<re(r"1[3456789][0-9]{9}"):mobile>')
-    def get_sms_codes(mobile):
-        # 一 获取参数 ： 图像验证码 / 图像编码
-        image_code = request.args.get('image_cade')
-        image_code_id  = request.args.get('image_code_id')
+@api.route('/sms_codes/<re(r"1[3456789][0-9]{9}"):mobile>')
+def get_sms_codes(mobile):
+    # 一 获取参数 ： 图像验证码 / 图像编码
+    image_code = request.args.get('image_code')
+    image_code_id  = request.args.get('image_code_id')
 
-        # 二 校验参数 ：判断完整性
-        # 如果数据不为空 继续向下执行
-        if not all([image_code,image_code_id]):
-            resp = {
-                'errno':RET.PARAMERR,
-                'errmsg':'参数不全'
-            }
-            return jsonify(resp)
-        # 三 逻辑处理
-        # 1 从redis中获取数据对比
-        # 2 判断用户是否已经注册
-        # 3 调用第三方SDK发短信
+    # 二 校验参数 ：判断完整性
+    # 如果数据不为空 继续向下执行
+    if not all([image_code,image_code_id]):
+        resp = {
+            'errno':RET.PARAMERR,
+            'errmsg':'参数不全'
+        }
+        return jsonify(resp)
+    # 三 逻辑处理
+    # 1 从redis中获取数据对比
+    # 2 判断用户是否已经注册
+    # 3 调用第三方SDK发短信
 
-        # 1-1 从redis获取验证码（键值）
-        try:
-            real_image_code = redis_store.get('image_code_%s' % image_code_id)
-        except Exception as e:
-            logging.error(e)
-            resp = {
-                'errno':RET.DBERR,
-                'errmsg':'redis读取数据失败'
-            }
-            return jsonify(resp)
-        # 1-2首先判断数据是否为none
-        if real_image_code is None:
+    # 1-1 从redis获取验证码（键值）
+    try:
+        real_image_code = redis_store.get('image_code_%s' % image_code_id)
+    except Exception as e:
+        logging.error(e)
+        resp = {
+            'errno':RET.DBERR,
+            'errmsg':'redis读取数据失败'
+        }
+        return jsonify(resp)
+    # 1-2首先判断数据是否为none
+    if real_image_code is None:
+        resp = {
+            'errno':RET.DATAERR,
+            'errmsg':'验证码已过期，请重新刷新获取'
+        }
+        return jsonify(resp)
+    # 1-3无论是否对比成功 都要先删除数据库的验证码 确保验证码只能验证一次
+    try:
+        redis_store.delete('image_code_%s' % image_code_id)
+    except Exception as e:
+        logging.error(e)
+        resp = {
+            'errno':RET.DBERR,
+            'errmsg':'redis删除失败'
+        }
+        return jsonify(resp)
+    # 1-4 与从请求端发来验证码进行对比
+    if real_image_code.lower() != image_code.lower():
+        resp = {
+            'errno':RET.DATAERR,
+            'errmsg':'验证码填写错误，请刷新后重试'
+        }
+        return jsonify(resp)
+
+    # 2 判断用户是否注册过
+    # 2-1 查询数据库的操作
+    # 2-2 判断数据是否为None
+    try:
+        # 属性：mobile = db.Column(db.String(11), unique=True, nullable=False)  # 手机号
+        user = User.query.filter_by(mobile=mobile).first()
+    except Exception as e:
+        logging.error(e)
+        resp = {
+            'errno':RET.DBERR,
+            'errmsg':'mysql查询失败'
+        }
+        return jsonify(resp)
+    else:
+        # 执行成功走else
+        if user is not None:
+            # 用户已经注册过
             resp = {
                 'errno':RET.DATAERR,
-                'errmsg':'验证码已过期，请重新刷新获取'
-            }
-            return jsonify(resp)
-        # 1-3无论是否对比成功 都要先删除数据库的验证码 确保验证码只能验证一次
-        try:
-            redis_store.delete('image_code_%s' % image_code_id)
-        except Exception as e:
-            logging.error(e)
-            resp = {
-                'errno':RET.DBERR,
-                'errmsg':'redis删除失败'
-            }
-            return jsonify(resp)
-        # 1-4 与从请求端发来验证码进行对比
-        if real_image_code.lower() != image_code.lower():
-            resp = {
-                'errno':RET.DATAERR,
-                'errmsg':'验证码填写错误，请刷新后重试'
+                'errmsg':'该用户的手机已经注册'
             }
             return jsonify(resp)
 
-        # 2 判断用户是否注册过
-        # 2-1 查询数据库的操作
-        # 2-2 判断数据是否为None
-        try:
-            # 属性：mobile = db.Column(db.String(11), unique=True, nullable=False)  # 手机号
-            user = User.query.filter_by(mobile=mobile).first()
-        except Exception as e:
-            logging.error(e)
-            resp = {
-                'errno':RET.DBERR,
-                'errmsg':'mysql查询失败'
-            }
-            return jsonify(resp)
-        else:
-            # 执行成功走else
-            if user is not None:
-                # 用户已经注册过
-                resp = {
-                    'errno':RET.DATAERR,
-                    'errmsg':'该用户的手机已经注册'
-                }
-                return jsonify(resp)
 
-        # 3 调用第三方SDF发短信
-        # 3—1 创建6位短信验证码 000000
-        # import random
-        sms_code = '%06d' % random.randint(0,999999)
+    # 3 调用第三方SDF发短信
+    # 3—1 创建6位短信验证码     验证码是我们自己定义的
+    # import random
+    sms_code = '%06d' % random.randint(0,999999)
 
-        # 3_2 保存到redis中
-        try:
-            redis_store.setex('sms_code_%s' % mobile, 300, sms_code)
-        except Exception as e:
-            logging.error(e)
-            resp = {
-                'errno':RET.DBERR,
-                'errmsg':'redis保存失败'
-            }
-            return jsonify(resp)
-        # 3-3 发送验证码
-        ccp = CCP()
-        result = ccp.send_template_sms(mobile,[sms_code,'5'],1)
 
-        # 四 返回数据
-        if result == '000000':
-            resp = {
-                'errno':RET.OK,
-                'errmsg':'发送短信成功'
-            }
-            return jsonify(resp)
-        else:
-            resp = {
-                'errno':RET.THIRDERR,
-                'errmsg':'发送短信失败'
-            }
-            return jsonify(resp)
+    # 3_2 保存到redis中
+    try:
+        redis_store.setex('sms_code_%s' % mobile, 300, sms_code)
+    except Exception as e:
+        logging.error(e)
+        resp = {
+            'errno':RET.DBERR,
+            'errmsg':'redis保存失败'
+        }
+        return jsonify(resp)
+    # 3-3 发送验证码
+    ccp = CCP()
+    result = ccp.send_template_sms(mobile,[sms_code,'5'],1)
+
+    # 四 返回数据
+    if result == '000000':
+        resp = {
+            'errno':RET.OK,
+            'errmsg':'发送短信成功'
+        }
+        return jsonify(resp)
+    else:
+        resp = {
+            'errno':RET.THIRDERR,
+            'errmsg':'发送短信失败'
+        }
+        return jsonify(resp)

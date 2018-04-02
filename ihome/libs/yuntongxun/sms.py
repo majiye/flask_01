@@ -4,13 +4,13 @@ from CCPRestSDK import REST
 import ConfigParser
 
 # 主帐号
-accountSid = '8aaf07085f9eb021015fb58c56d906e8'
+accountSid = '8a216da862467c3a0162716f12f513b5'
 
 # 主帐号Token
-accountToken = 'e21ca96da61c49ee97e0fdf1ba47de5a'
+accountToken = '70bcf3e8028a49d1a49b24308880f8d3'
 
 # 应用Id
-appId = '8aaf07085f9eb021015fb58c574106ef'
+appId = '8a216da862467c3a0162716f134413bb'
 
 # 请求地址，格式如下，不需要写http://
 serverIP = 'app.cloopen.com'
@@ -86,4 +86,5 @@ if __name__ == '__main__':
     # ccp2 = CCP()
     # ccp3 = CCP()
     ccp = CCP()
-    ccp.send_template_sms('17610811111', ['9527','5'], 1)
+    # 9527 是自己定义的验证码 5分钟后失效 模板是1
+    ccp.send_template_sms('17521192856', ['9527','5'], 1)
