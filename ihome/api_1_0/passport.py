@@ -10,6 +10,8 @@ errmsg: 最好用于用户的显示. 方便前后端开发, 他们只需要做�
 
 import re
 import logging
+
+from ihome.utils.common import login_required
 from . import api
 from flask import request, jsonify, current_app, session
 from ihome.utils.response_code import RET
@@ -107,6 +109,8 @@ def register():
         # user.password_hash = password
 
         try:
+            # flask 利用Chemisql操作数据库的方法 db.session
+            # 把新用户添加到数据库
             db.session.add(user)
             db.session.commit()
         except Exception as e:
@@ -198,3 +202,28 @@ def login():
 
         # 四. 返回数据
     return jsonify(errno=RET.OK, errmsg='登录成功')
+
+
+@api.route('/sessions', methods=['GET'])
+def check_login():
+    '''检查登录状态'''
+    # 尝试从session中获取用户的名字
+    name = session.get('user_name')
+    # 如果session中数据name存在 则表示用户已登录 否则表示未登录
+    if name is not None:
+        return jsonify(errno=RET.OK, errmsg='true', data={"name":name})
+    else:
+        return jsonify(errno=RET.SESSIONERR, errmsg='false')
+
+
+@api.route('/sessions',mession=['DELETE'])
+@login_required
+def logout():
+    '''登录'''
+    # 清除session数据 csrf_token需要保留数据
+    csrf_token = session['csrf_token']
+    session.clear()
+    session['csrf_token'] = csrf_token
+    # 删除session的方式 3种
+    # 1 session.pop()  2 和Django所学相同  3 session.clear()全部删除
+    return jsonify(errno=RET.OK, errmsg="ok")

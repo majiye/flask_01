@@ -10,7 +10,7 @@ from flask_wtf import CSRFProtect
 import redis
 from config import Config
 from flask_session import Session
-from utils.commons import RegexConverter
+from utils.common import RegexConverter
 db = SQLAlchemy()
 
 # 其他模块使用redis_store操作redis
