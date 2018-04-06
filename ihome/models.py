@@ -80,6 +80,13 @@ class Area(BaseModel, db.Model):
     houses = db.relationship("House", backref="area")  # 区域的房屋
 
 
+    def to_dict(self):
+        area_dict = {
+            'aid': self.id,
+            'aname': self.name
+        }
+        return area_dict
+
 # 房屋设施表，建立房屋与设施的多对多关系
 # 如果是多对多, 直接操作底层的表
 house_facility = db.Table(
