@@ -43,6 +43,8 @@ def get_image_code(image_code_id):
     # 请求方法get
     # 路由：sms_codes
     # 参数：手机号 / 图像验证码 / 编号
+
+
 @api.route('/sms_codes/<re(r"1[3456789][0-9]{9}"):mobile>')
 def get_sms_codes(mobile):
     # 一 获取参数 ： 图像验证码 / 图像编码

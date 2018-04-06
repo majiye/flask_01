@@ -87,17 +87,19 @@ def register():
     # 2. 判断用户是否注册过，没注册就创建并保存用户(密码保存,会在模型中做加密处理)
     try:
         user = User.query.filter_by(mobile=mobile).first()
+        print('hello 0000')
     except Exception as e:
         logging.error(e)
         return jsonify(errno=RET.DBERR, errmsg='mysql查询失败')
     else:
         if user is not None:
             # 用户信息不是None, 说明已存在(已注册)
+            print('hello 1111')
             return jsonify(errno=RET.DATAEXIST, errmsg='用户手机号已经注册')
 
         # 用户没有注册过 --> 创建用户对象并保存
         user = User(name=mobile, mobile=mobile)
-
+        print('hello 3333')
         # pbkdf2:sha256:50000$ey5Pg8Ie$4fca7afb538b79c4d6c66a4c8c3cae23c192f02bfa97e8c51605d1fa6cd08773
         user.password = password
 
@@ -113,10 +115,12 @@ def register():
             # 把新用户添加到数据库
             db.session.add(user)
             db.session.commit()
+            print('hello 4444')
         except Exception as e:
             # 还需要数据回滚
             db.session.rollback()
             logging.error(e)
+            print('hello 5555')
             return jsonify(errno=RET.DBERR, errmsg='mysql添加失败')
 
     # 3.（注册后直接登录）保存session
@@ -124,6 +128,7 @@ def register():
         session['user_id'] = user.id
         session['user_name'] = mobile
         session['mobile'] = mobile
+        print('hello 6666')
     except Exception as e:
         logging.error(e)
         return jsonify(errno=RET.SESSIONERR, errmsg='session设置失败')
@@ -206,7 +211,7 @@ def login():
 
 @api.route('/sessions', methods=['GET'])
 def check_login():
-    '''检查登录状态'''
+    '''检查登录状态  就是检查session'''
     # 尝试从session中获取用户的名字
     name = session.get('user_name')
     # 如果session中数据name存在 则表示用户已登录 否则表示未登录
@@ -216,11 +221,11 @@ def check_login():
         return jsonify(errno=RET.SESSIONERR, errmsg='false')
 
 
-@api.route('/sessions',mession=['DELETE'])
+@api.route('/sessions',methods=['DELETE'])
 @login_required
 def logout():
     '''登录'''
-    # 清除session数据 csrf_token需要保留数据
+    # 清除session数据 csrf_token需要保留数据 注意保留csrf_token
     csrf_token = session['csrf_token']
     session.clear()
     session['csrf_token'] = csrf_token

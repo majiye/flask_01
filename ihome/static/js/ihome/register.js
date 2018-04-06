@@ -58,7 +58,7 @@ function sendSMSCode() {
             $(".phonecode-a").attr("onclick", "sendSMSCode();");
         } else if ( resp.errno == 0 ) {
             // 发送短信成功
-            var $time = $(".phonecode-a");
+            var $time = $(".phonecode-a");dsfsdfdf
             var duration = 60;
             // 设置定时器
             var intervalid = setInterval(function(){

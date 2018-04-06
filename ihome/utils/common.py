@@ -7,7 +7,7 @@ from flask import session, g, jsonify
 from ihome.utils.response_code import RET
 from functools import wraps
 
-
+# 转换器
 class RegexConverter(BaseConverter):
     def __init__(self, url_map, regex):
         super(RegexConverter, self).__init__(url_map)
