@@ -16,8 +16,8 @@ SDK: 开发组件包,保护代码/文档/示例....
 """
 
 # 需要填写你的 Access Key 和 Secret Key
-access_key = '6HpJXhnT1MS70c7GjT--UrvRn6sMsxwDkIQ1fYQq'
-secret_key = 'rn0V8J7trKklJwTRA8arYoFFCOe6OftoCt_w-s-4'
+access_key = 'ATldzdlglgNtZr-Ju5QtGHW4punC3D3GHppZSjeI'
+secret_key = 'Y1r_uIDpfMPFoLbcLR_SCbbyna5PEnoCb72SYbK3'
 
 # 我们使用此工具类的目的, 是调用存储图像方法后, 能够获得图像名-->给用户的用户头像路径赋值
 def storage(file_data):
@@ -26,11 +26,12 @@ def storage(file_data):
     q = Auth(access_key, secret_key)
 
     # 要上传的空间
-    bucket_name = 'itheimaihome'
+    bucket_name = 'eeeee'
 
-    # 我们不需要这个Key. 七牛会自动生成
+    # 我们不需要这个Key. 七牛会自动生成 所以定义为None
     # 上传到七牛后保存的文件名
     # key = 'my-python-logo.png';
+    # 这里把key 设为None
 
     # 生成上传 Token，可以指定过期时间等
     token = q.upload_token(bucket_name, None, 3600)
@@ -58,7 +59,7 @@ def storage(file_data):
 if __name__ == '__main__':
     # 打开图片数据
     # rb: 以二进制读
-    with open("./girl.jpg", "rb") as f:
+    with open("./003.jpg", "rb") as f:
         # 读取图片数据二进制数据
         file_data = f.read()
         # 上传图片书记到七牛云

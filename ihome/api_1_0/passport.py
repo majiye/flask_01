@@ -141,7 +141,7 @@ def register():
 # 参数: mobile / password
 @api.route('/sessions', methods=['POST'])
 def login():
-
+    '''用户登录'''
     # 一. 获取参数
     req_json = request.get_json()
     mobile = req_json.get('mobile')

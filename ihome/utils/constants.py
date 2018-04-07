@@ -7,7 +7,7 @@ IMAGE_CODE_YTX_EXPIRE = '5'  # 图片验证码redis保存的有效期，单位�
 
 SMS_CODE_REDIS_EXPIRE = 300  # 短信验证码redis保存的有效期，单位秒
 
-QINIU_URL_DOMAIN = "http://ozcxm6oo6.bkt.clouddn.com/"  # 七牛的访问域名
+QINIU_URL_DOMAIN = "http://p6rn62xoo.bkt.clouddn.com/"  # 七牛的访问域名
 
 LOGIN_ERROR_MAX_NUM = 5  # 登录的最大错误次数
 

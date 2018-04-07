@@ -1,3 +1,5 @@
+
+
 function showSuccessMsg() {
     $('.popup_con').fadeIn('fast', function() {
         setTimeout(function(){
@@ -13,6 +15,7 @@ function getCookie(name) {
 
 $(document).ready(function () {
     // 页面加载好
+
     $("#form-avatar").submit(function (event) {
         // 阻止表单的默认行为
         event.preventDefault();
